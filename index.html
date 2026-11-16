@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telling Time - الأستاذ علي عسيري</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #1e293b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .main-container {
+            width: 99vw;
+            height: 99vh;
+            position: relative;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            border: 3px solid #0284c7;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 65px 12px 12px 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        /* توقيع الأستاذ علي عسيري */
+        .author-badge {
+            position: absolute;
+            top: 10px;
+            left: 2%;
+            background-color: rgba(0, 0, 0, 0.85);
+            color: #ffeb3b;
+            padding: 6px 16px;
+            font-size: 17px;
+            font-weight: bold;
+            border-radius: 20px;
+            border: 2px solid #ffeb3b;
+            z-index: 3000;
+            pointer-events: none;
+            direction: rtl;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            white-space: nowrap;
+        }
+
+        /* عنوان الدرس في المنتصف العلوي */
+        .lesson-title-badge {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: #ffffff;
+            padding: 6px 24px;
+            font-size: 20px;
+            font-weight: 800;
+            border-radius: 20px;
+            border: 2px solid #fde047;
+            z-index: 2500;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        /* أزرار التحكم بحجم كبير وواضح ومريح */
+        .controls-header {
+            position: absolute;
+            top: 10px;
+            right: 2%;
+            display: flex;
+            gap: 12px;
+            z-index: 3000;
+        }
+
+        .mode-btn {
+            padding: 8px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+            border: 2.5px solid #ffffff;
+            border-radius: 22px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: transform 0.2s, background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        .mode-btn:hover {
+            transform: scale(1.06);
+        }
+
+        .btn-practice { background-color: #22c55e; }
+        .btn-test { background-color: #ef4444; }
+        .btn-test2 { background-color: #f59e0b; }
+
+        @media (max-width: 1024px) {
+            .author-badge { font-size: 13px; padding: 5px 10px; left: 1%; top: 8px; }
+            .lesson-title-badge { font-size: 14px; padding: 5px 12px; top: 8px; }
+            .controls-header { gap: 6px; right: 1%; top: 8px; }
+            .mode-btn { padding: 6px 12px; font-size: 14px; }
+            .main-container { padding-top: 50px; }
+        }
+
+        /* شبكة الساعات التسع بالحجم المناسب والمضبوط تماماً */
+        .clocks-grid {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .clock-cell {
+            position: relative;
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .clock-cell:hover {
+            transform: scale(1.01);
+            border-color: #0284c7;
+        }
+
+        .clock-cell img {
+            height: 98%;
+            width: 92%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        /* المربع الشفاف التفاعلي فوق كل ساعة */
+        .hotspot {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: background-color 0.2s, border 0.2s;
+            z-index: 10;
+        }
+
+        .hotspot:hover {
+            background-color: rgba(255, 235, 59, 0.2);
+            border: 2px dashed #f59e0b;
+        }
+
+        /* النافذة المنبثقة لانتهاء التدريب */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 6000; display: none; justify-content: center; align-items: center;
+        }
+
+        .modal-box {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            padding: 30px 50px; border-radius: 25px; text-align: center; color: #fff;
+            border: 4px solid #ffeb3b; box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            animation: popIn 0.4s ease; min-width: 320px; direction: rtl;
+        }
+
+        .modal-title { font-size: 30px; font-weight: bold; margin-bottom: 10px; color: #ffeb3b; }
+        .modal-subtitle { font-size: 22px; margin-bottom: 25px; font-weight: bold; }
+        .modal-ok-btn {
+            background: #ffeb3b; color: #000; border: none; padding: 10px 40px;
+            font-size: 22px; font-weight: bold; border-radius: 20px; cursor: pointer;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.4); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* نافذة الترحيب للاختبارات */
+        .test-welcome-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px);
+            z-index: 7000; display: none; justify-content: center; align-items: center;
+        }
+
+        .test-welcome-card {
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            padding: 35px 50px; border-radius: 30px; text-align: center; color: #ffffff;
+            border: 4px solid #fde047; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            min-width: 380px; direction: rtl;
+        }
+
+        .test-welcome-title { font-size: 34px; font-weight: 800; margin-bottom: 16px; color: #fde047; }
+        .test-welcome-desc { font-size: 26px; font-weight: bold; margin-bottom: 30px; color: #ffffff; }
+
+        .start-test-btn {
+            background: linear-gradient(135deg, #fde047 0%, #eab308 100%);
+            color: #1e1b4b; border: 3px solid #ffffff; padding: 14px 45px;
+            font-size: 26px; font-weight: bold; border-radius: 50px; cursor: pointer;
+        }
+
+        /* شاشة عرض الأسئلة */
+        .test-screen-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px);
+            z-index: 8000; display: none; justify-content: center; align-items: center;
+        }
+
+        .test-screen-card {
+            width: 98vw; height: 98vh;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 3px solid #fde047; border-radius: 18px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.7);
+            display: flex; flex-direction: column; justify-content: space-between;
+            align-items: center; padding: 8px 15px; position: relative; direction: rtl;
+        }
+
+        .test-question-header {
+            width: 100%; text-align: center; background: rgba(255, 255, 255, 0.08);
+            padding: 4px 12px; border-radius: 10px; border: 2px solid rgba(253, 224, 71, 0.3);
+            position: relative; flex-shrink: 0;
+        }
+
+        .test-question-tracker { font-size: 13px; color: #94a3b8; font-weight: bold; margin-bottom: 2px; }
+        .test-question-title { font-size: 24px; font-weight: 800; color: #fde047; direction: ltr; display: inline-block; }
+
+        /* شبكة خيارات الاختبار الأول */
+        .test-options-grid {
+            width: 100%; flex: 1; display: grid;
+            grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 10px 0; align-items: center;
+        }
+
+        @media (max-width: 900px) {
+            .test-options-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        }
+
+        .test-option-card {
+            background: #ffffff; border: 3px solid #38bdf8;
+            border-radius: 16px; overflow: hidden; cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4); height: 100%;
+            position: relative; padding: 4px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .test-option-card:hover { transform: translateY(-2px) scale(1.02); border-color: #fde047; }
+        
+        .test-option-card img { 
+            height: 98%;
+            width: 92%;
+            object-fit: contain; 
+        }
+
+        /* علامات الصح والخطأ الواضحة فوق الاختيارات */
+        .badge-feedback {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 40px;
+            font-weight: 900;
+            z-index: 10;
+            text-shadow: 0 3px 10px rgba(0,0,0,0.6);
+            animation: popBadge 0.3s ease;
+        }
+
+        @keyframes popBadge {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .test-result-box {
+            text-align: center; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; height: 100%; width: 100%;
+        }
+
+        .test-result-finished-text { font-size: 42px; font-weight: 800; color: #fde047; margin-bottom: 25px; }
+
+        .show-result-btn {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: #ffffff; border: 3px solid #ffffff; padding: 16px 45px;
+            font-size: 28px; font-weight: bold; border-radius: 50px; cursor: pointer;
+        }
+
+        .test-final-evaluation {
+            font-size: 38px; font-weight: bold; color: #ffffff; margin-top: 20px;
+            padding: 15px 35px; border-radius: 20px; background: rgba(255,255,255,0.1); border: 2px solid #fde047;
+        }
+
+        .test-exit-top-btn {
+            position: absolute; top: 6px; left: 10px; background: #ef4444;
+            color: #ffffff; border: 2px solid #ffffff; padding: 3px 12px;
+            font-size: 13px; font-weight: bold; border-radius: 15px; cursor: pointer;
+        }
+
+        /* نافذة تأكيد الخروج */
+        .exit-confirm-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(5px);
+            z-index: 9500; display: none; justify-content: center; align-items: center;
+        }
+
+        .exit-confirm-card {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            padding: 30px 45px; border-radius: 28px; text-align: center; color: #ffffff;
+            border: 4px solid #fde047; min-width: 350px; direction: rtl;
+        }
+
+        .exit-confirm-title { font-size: 32px; font-weight: 800; color: #fde047; margin-bottom: 25px; }
+        .exit-confirm-btns { display: flex; justify-content: center; gap: 20px; }
+        .exit-btn-ok, .exit-btn-cancel {
+            border: 2px solid #ffffff; padding: 10px 32px; font-size: 22px; font-weight: bold;
+            border-radius: 25px; cursor: pointer; color: #fff;
+        }
+        .exit-btn-ok { background: #22c55e; }
+        .exit-btn-cancel { background: #ef4444; }
+
+        /* تنسيقات اختبار 2 */
+        .test2-options-grid {
+            width: 100%; flex: 1; display: flex; flex-direction: column;
+            justify-content: space-evenly; align-items: center; gap: 6px; padding: 4px 0;
+        }
+
+        .test2-img-container {
+            width: 49vh;
+            height: 49vh;
+            max-width: 390px;
+            max-height: 390px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 3px solid #38bdf8;
+            border-radius: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            flex-shrink: 0;
+            padding: 4px;
+            position: relative;
+        }
+
+        .test2-img-container img {
+            height: 98%;
+            width: 92%;
+            object-fit: contain;
+        }
+
+        .test2-option-card {
+            width: 85%;
+            max-width: 520px;
+            background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+            border: 3px solid #fde047;
+            border-radius: 14px;
+            padding: 10px 18px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+            position: relative;
+            transition: transform 0.2s;
+            direction: ltr;
+        }
+
+        .test2-option-card:hover {
+            transform: scale(1.02); background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        }
+
+        .test2-option-text {
+            font-size: 25px; font-weight: 800; color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- توقيع المصمم -->
+        <div class="author-badge">تصميم الأستاذ علي عسيري</div>
+
+        <!-- عنوان الدرس التفاعلي -->
+        <div class="lesson-title-badge" onclick="location.reload()">What time is it? ⏰</div>
+
+        <!-- أزرار التحكم (بحجمها الكبير والمريح) -->
+        <div class="controls-header">
+            <button class="mode-btn btn-practice" onclick="startPracticeMode()">تدريب 🎯</button>
+            <button class="mode-btn btn-test" onclick="startTestMode()">اختبار1 📝</button>
+            <button class="mode-btn btn-test2" onclick="startTest2Mode()">اختبار2 📝</button>
+        </div>
+
+        <!-- شبكة الساعات التسع بالترتيب المطابق تماماً لصورة الأستاذ علي -->
+        <div class="clocks-grid" id="clocksGrid">
+            <!-- الصف الأول: 7:00 ، 12:00 ، 3:00 -->
+            <div class="clock-cell">
+                <img src="700.png" alt="It's 7:00">
+                <div class="hotspot" onclick="handleItemClick('700.mp3', 'It\'s 7:00')"></div>
+            </div>
+            <div class="clock-cell">
+                <img src="1200.png" alt="It's 12:00">
+                <div class="hotspot" onclick="handleItemClick('1200.mp3', 'It\'s 12:00')"></div>
+            </div>
+            <div class="clock-cell">
+                <img src="300.png" alt="It's 3:00">
+                <div class="hotspot" onclick="handleItemClick('300.mp3', 'It\'s 3:00')"></div>
+            </div>
+
+            <!-- الصف الثاني: 8:30 ، 11:30 ، 5:45 -->
+            <div class="clock-cell">
+                <img src="830.png" alt="It's 8:30">
+                <div class="hotspot" onclick="handleItemClick('830.mp3', 'It\'s 8:30')"></div>
+            </div>
+            <div class="clock-cell">
+                <img src="1130.png" alt="It's 11:30">
+                <div class="hotspot" onclick="handleItemClick('1130.mp3', 'It\'s 11:30')"></div>
+            </div>
+            <div class="clock-cell">
+                <img src="545.png" alt="It's 5:45">
+                <div class="hotspot" onclick="handleItemClick('545.mp3', 'It\'s 5:45')"></div>
+            </div>
+
+            <!-- الصف الثالث: 1:10 ، 9:20 ، 6:40 -->
+            <div class="clock-cell">
+                <img src="110.png" alt="It's 1:10">
+                <div class="hotspot" onclick="handleItemClick('110.mp3', 'It\'s 1:10')"></div>
+            </div>
+            <div class="clock-cell">
+                <img src="920.png" alt="It's 9:20">
+                <div class="hotspot" onclick="handleItemClick('920.mp3', 'It\'s 9:20')"></div>
+            </div>
+            <div class="clock-cell">
+                <img src="640.png" alt="It's 6:40">
+                <div class="hotspot" onclick="handleItemClick('640.mp3', 'It\'s 6:40')"></div>
+            </div>
+        </div>
+
+        <!-- النافذة المنبثقة لانتهاء التدريب -->
+        <div id="finishModal" class="modal-overlay">
+            <div class="modal-box">
+                <div class="modal-title">أحسنت يا بطل! 🎉</div>
+                <div class="modal-subtitle">لقد أتممت الجولة التدريبية بنجاح 🌟</div>
+                <button class="modal-ok-btn" onclick="location.reload()">موافق</button>
+            </div>
+        </div>
+
+        <!-- نافذة الترحيب المشتركة للاختبارات -->
+        <div id="testWelcomeModal" class="test-welcome-overlay">
+            <div class="test-welcome-card">
+                <div class="test-welcome-title" id="welcomeModalTitle">اختبار قراءة الساعة 🏆</div>
+                <div class="test-welcome-desc" id="welcomeModalDesc">هل أنت مستعد لاختبار معلوماتك واكتشاف مستوى إتقانك؟</div>
+                <button class="start-test-btn" id="welcomeStartBtn" onclick="onStartTestClick()">لنبدأ الاختبار 🚀</button>
+            </div>
+        </div>
+
+        <!-- شاشة عرض الأسئلة -->
+        <div id="testScreenOverlay" class="test-screen-overlay">
+            <div class="test-screen-card" id="testScreenCard">
+                <div class="test-question-header" id="testQuestionHeader">
+                    <button class="test-exit-top-btn" onclick="openExitConfirmModal()">✖ خروج</button>
+                    <div class="test-question-tracker" id="testQuestionTracker">السؤال 1 من 9</div>
+                    <div class="test-question-title" id="testQuestionTitle">It's 3:00</div>
+                </div>
+                <div class="test-options-grid" id="testOptionsGrid"></div>
+            </div>
+        </div>
+
+        <!-- نافذة تأكيد الخروج -->
+        <div id="exitConfirmModal" class="exit-confirm-overlay">
+            <div class="exit-confirm-card">
+                <div class="exit-confirm-title">خروج من الاختبار ⚠️</div>
+                <div class="exit-confirm-btns">
+                    <button class="exit-btn-ok" onclick="confirmCancelTest()">موافق</button>
+                    <button class="exit-btn-cancel" onclick="confirmContinueTest()">إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة نظام الحماية -->
+    <div id="expiryOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center;">
+        <div style="background:linear-gradient(135deg, #e74c3c, #c0392b); padding:40px; border-radius:20px; text-align:center; color:white; box-shadow:0 10px 30px rgba(0,0,0,0.7); max-width:450px; width:90%; border:4px solid #fff;">
+            <h2 style="font-size:30px; margin-bottom:15px; text-shadow:2px 2px 4px rgba(0,0,0,0.4);">رسالة تنبيه</h2>
+            <p style="font-size:20px; margin-bottom:25px; font-weight:bold;">تم تعطيل البرنامج</p>
+            <button onclick="closeApp()" style="background-color:#2ecc71; color:white; border:2px solid white; padding:10px 30px; font-size:18px; font-weight:bold; border-radius:10px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.3); transition:0.2s;">موافق</button>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'normal';
+        let currentTarget = null;
+        let practiceQueue = [];
+        let testQuestionsQueue = [];
+        let testCurrentQuestionIndex = 0;
+        let testScore = 0;
+        let currentActiveTest = 'test1';
+        let isProcessingTestClick = false;
+        let currentPlayingAudio = null;
+
+        /* جدول بيانات الساعات بالترتيب الدقيق */
+        const itemsList = [
+            { audio: '700.mp3', text: "It's 7:00", image: '700.png' },
+            { audio: '1200.mp3', text: "It's 12:00", image: '1200.png' },
+            { audio: '300.mp3', text: "It's 3:00", image: '300.png' },
+            { audio: '830.mp3', text: "It's 8:30", image: '830.png' },
+            { audio: '1130.mp3', text: "It's 11:30", image: '1130.png' },
+            { audio: '545.mp3', text: "It's 5:45", image: '545.png' },
+            { audio: '110.mp3', text: "It's 1:10", image: '110.png' },
+            { audio: '920.mp3', text: "It's 9:20", image: '920.png' },
+            { audio: '640.mp3', text: "It's 6:40", image: '640.png' }
+        ];
+
+        function shuffleArray(array) {
+            let shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        /* دالة (تسريع) لإيقاف أي صوت سابق فوراً ومنع التداخل */
+        function stopCurrentAudio() {
+            if (currentPlayingAudio) {
+                currentPlayingAudio.pause();
+                currentPlayingAudio.currentTime = 0;
+                currentPlayingAudio = null;
+            }
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function startPracticeMode() {
+            currentMode = 'practice';
+            practiceQueue = shuffleArray(itemsList);
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            if (practiceQueue.length > 0) {
+                const currentItem = practiceQueue.pop();
+                currentTarget = currentItem.text;
+                playAudio(currentItem.audio);
+            } else {
+                showFinishModal();
+            }
+        }
+
+        function showFinishModal() {
+            playAudio('good.mp3');
+            document.getElementById('finishModal').style.display = 'flex';
+        }
+
+        function handleItemClick(audioFile, text) {
+            if (currentMode === 'normal') {
+                playAudio(audioFile);
+            } else if (currentMode === 'practice') {
+                if (text === currentTarget) {
+                    playAudio('good.mp3');
+                    setTimeout(() => {
+                        nextQuestion();
+                    }, 1200);
+                } else {
+                    playAudioAsync('alert.mp3').then(() => {
+                        playAudio(currentItemAudioByText(currentTarget));
+                    });
+                }
+            }
+        }
+
+        function currentItemAudioByText(textVal) {
+            const found = itemsList.find(i => i.text === textVal);
+            return found ? found.audio : '';
+        }
+
+        function playAudio(filename) {
+            stopCurrentAudio();
+            const audio = new Audio(filename);
+            currentPlayingAudio = audio;
+            audio.play().catch(() => {});
+            return audio;
+        }
+
+        function playAudioAsync(filename) {
+            return new Promise((resolve) => {
+                stopCurrentAudio();
+                const audio = new Audio(filename);
+                currentPlayingAudio = audio;
+                
+                audio.onended = () => {
+                    currentPlayingAudio = null;
+                    resolve();
+                };
+                audio.onerror = () => {
+                    currentPlayingAudio = null;
+                    resolve();
+                };
+                audio.play().catch(() => {
+                    currentPlayingAudio = null;
+                    resolve();
+                });
+                
+                setTimeout(() => {
+                    if (currentPlayingAudio === audio) {
+                        currentPlayingAudio = null;
+                        resolve();
+                    }
+                }, 4000);
+            });
+        }
+
+        function startTestMode() {
+            currentActiveTest = 'test1';
+            document.getElementById('welcomeModalTitle').innerText = 'اختبار قراءة الساعة 🏆';
+            document.getElementById('testWelcomeModal').style.display = 'flex';
+        }
+
+        function startTest2Mode() {
+            currentActiveTest = 'test2';
+            document.getElementById('welcomeModalTitle').innerText = 'اختبار مطابقة الوقت (اختبار2) 🏆';
+            document.getElementById('testWelcomeModal').style.display = 'flex';
+        }
+
+        function onStartTestClick() {
+            document.getElementById('testWelcomeModal').style.display = 'none';
+            if (currentActiveTest === 'test1') {
+                initTestSession();
+            } else if (currentActiveTest === 'test2') {
+                initTest2Session();
+            }
+        }
+
+        function initTestSession() {
+            currentMode = 'test';
+            testScore = 0;
+            testCurrentQuestionIndex = 0;
+            isProcessingTestClick = false;
+            stopCurrentAudio();
+            testQuestionsQueue = shuffleArray(itemsList);
+
+            document.getElementById('testScreenOverlay').style.display = 'flex';
+            renderTestQuestion();
+        }
+
+        function renderTestQuestion() {
+            isProcessingTestClick = false;
+            stopCurrentAudio();
+            const currentItem = testQuestionsQueue[testCurrentQuestionIndex];
+            
+            document.getElementById('testQuestionTracker').innerText = `السؤال ${testCurrentQuestionIndex + 1} من ${testQuestionsQueue.length}`;
+            document.getElementById('testQuestionTitle').innerText = currentItem.text;
+
+            playAudioAsync(currentItem.audio);
+            
+            const wrongOptions = itemsList.filter(item => item.text !== currentItem.text);
+            const shuffledWrong = shuffleArray(wrongOptions).slice(0, 3);
+            const fourOptions = shuffleArray([currentItem, ...shuffledWrong]);
+
+            const optionsGrid = document.getElementById('testOptionsGrid');
+            optionsGrid.className = 'test-options-grid';
+            optionsGrid.innerHTML = '';
+
+            fourOptions.forEach(opt => {
+                const card = document.createElement('div');
+                card.className = 'test-option-card';
+                card.onclick = () => onSelectImageInTest(card, opt, currentItem.text);
+
+                const img = document.createElement('img');
+                img.src = opt.image;
+                img.alt = opt.text;
+
+                card.appendChild(img);
+                optionsGrid.appendChild(card);
+            });
+        }
+
+        /* اختبار 1: اختيار الساعة المطابقة للوقت المنطوق */
+        function onSelectImageInTest(selectedCard, selectedOption, correctText) {
+            if (isProcessingTestClick) return;
+            isProcessingTestClick = true;
+
+            const isCorrect = (selectedOption.text === correctText);
+            const feedbackAudio = isCorrect ? 'good.mp3' : 'alert.mp3';
+
+            const badge = document.createElement('div');
+            badge.className = 'badge-feedback';
+            if (isCorrect) {
+                badge.innerHTML = '✅';
+                selectedCard.style.borderColor = '#22c55e';
+            } else {
+                badge.innerHTML = '❌';
+                selectedCard.style.borderColor = '#ef4444';
+                
+                const allCards = document.querySelectorAll('.test-option-card');
+                allCards.forEach(c => {
+                    const imgTag = c.querySelector('img');
+                    if (imgTag && imgTag.alt === correctText) {
+                        const correctBadge = document.createElement('div');
+                        correctBadge.className = 'badge-feedback';
+                        correctBadge.innerHTML = '✅';
+                        c.appendChild(correctBadge);
+                        c.style.borderColor = '#22c55e';
+                    }
+                });
+            }
+            selectedCard.appendChild(badge);
+
+            playAudioAsync(feedbackAudio).then(() => {
+                selectTestAnswer(isCorrect);
+            });
+        }
+
+        function initTest2Session() {
+            currentMode = 'test';
+            testScore = 0;
+            testCurrentQuestionIndex = 0;
+            isProcessingTestClick = false;
+            stopCurrentAudio();
+            testQuestionsQueue = shuffleArray(itemsList);
+
+            document.getElementById('testScreenOverlay').style.display = 'flex';
+            renderTest2Question();
+        }
+
+        function renderTest2Question() {
+            isProcessingTestClick = false;
+            stopCurrentAudio();
+            const currentItem = testQuestionsQueue[testCurrentQuestionIndex];
+            
+            document.getElementById('testQuestionTracker').innerText = `السؤال ${testCurrentQuestionIndex + 1} من ${testQuestionsQueue.length}`;
+            document.getElementById('testQuestionTitle').innerText = "What time is it?";
+
+            playAudioAsync(currentItem.audio);
+
+            const wrongOptions = itemsList.filter(item => item.text !== currentItem.text);
+            const shuffledWrong = shuffleArray(wrongOptions).slice(0, 2);
+            const threeOptions = shuffleArray([currentItem, ...shuffledWrong]);
+
+            const optionsGrid = document.getElementById('testOptionsGrid');
+            optionsGrid.className = 'test2-options-grid';
+            optionsGrid.innerHTML = '';
+
+            const imgCard = document.createElement('div');
+            imgCard.className = 'test2-img-container';
+
+            const img = document.createElement('img');
+            img.src = currentItem.image;
+            img.alt = currentItem.text;
+
+            imgCard.appendChild(img);
+            optionsGrid.appendChild(imgCard);
+
+            threeOptions.forEach(opt => {
+                const optCard = document.createElement('div');
+                optCard.className = 'test2-option-card';
+                optCard.onclick = () => selectTest2Answer(optCard, opt.text === currentItem.text, currentItem.text, currentItem.audio);
+
+                const textDiv = document.createElement('div');
+                textDiv.className = 'test2-option-text';
+                textDiv.innerText = opt.text;
+
+                optCard.appendChild(textDiv);
+                optionsGrid.appendChild(optCard);
+            });
+        }
+
+        /* اختبار 2: نطق الوقت الصحيح عند الإجابة الصحيحة وصوت التنبيه عند الخطأ */
+        function selectTest2Answer(selectedCard, isCorrect, correctTimeText, timeAudioFile) {
+            if (isProcessingTestClick) return;
+            isProcessingTestClick = true;
+
+            const feedbackAudio = isCorrect ? timeAudioFile : 'alert.mp3';
+
+            const badge = document.createElement('div');
+            badge.className = 'badge-feedback';
+            if (isCorrect) {
+                badge.innerHTML = '✅';
+                selectedCard.style.borderColor = '#22c55e';
+            } else {
+                badge.innerHTML = '❌';
+                selectedCard.style.borderColor = '#ef4444';
+
+                const allCards = document.querySelectorAll('.test2-option-card');
+                allCards.forEach(c => {
+                    const txt = c.querySelector('.test2-option-text');
+                    if (txt && txt.innerText === correctTimeText) {
+                        const correctBadge = document.createElement('div');
+                        correctBadge.className = 'badge-feedback';
+                        correctBadge.innerHTML = '✅';
+                        c.appendChild(correctBadge);
+                        c.style.borderColor = '#22c55e';
+                    }
+                });
+            }
+            selectedCard.appendChild(badge);
+
+            playAudioAsync(feedbackAudio).then(() => {
+                selectTestAnswer(isCorrect);
+            });
+        }
+
+        function selectTestAnswer(isCorrect) {
+            if (isCorrect) testScore++;
+            testCurrentQuestionIndex++;
+
+            setTimeout(() => {
+                if (testCurrentQuestionIndex < testQuestionsQueue.length) {
+                    if (currentActiveTest === 'test1') {
+                        renderTestQuestion();
+                    } else {
+                        renderTest2Question();
+                    }
+                } else {
+                    showTestFinishedScreen();
+                }
+            }, 800);
+        }
+
+        function showTestFinishedScreen() {
+            stopCurrentAudio();
+            const card = document.getElementById('testScreenCard');
+            card.innerHTML = `
+                <div class="test-result-box">
+                    <div class="test-result-finished-text">انتهى الاختبار 🏁</div>
+                    <button class="show-result-btn" onclick="revealTestResult()">إظهار النتيجة 📊</button>
+                    <div id="evaluationDisplay"></div>
+                </div>
+            `;
+        }
+
+        function revealTestResult() {
+            let evalMessage = "";
+            let evalAudio = "";
+
+            if (testScore >= 0 && testScore <= 3) {
+                evalMessage = "تدرب جيدا";
+            } else if (testScore >= 4 && testScore <= 6) {
+                evalMessage = "جيد";
+                evalAudio = "good.mp3";
+            } else if (testScore >= 7 && testScore <= 8) {
+                evalMessage = "جيد جداً";
+                evalAudio = "goodjob.mp3";
+            } else if (testScore === 9) {
+                evalMessage = "ممتاز , رائع , مبدع";
+                evalAudio = "clapping.mp3";
+            }
+
+            if (evalAudio) {
+                playAudio(evalAudio);
+            }
+
+            let evaluationText = `درجتك: ${testScore} من ${itemsList.length} <br> ${evalMessage}`;
+            const evalDiv = document.getElementById('evaluationDisplay');
+            evalDiv.className = 'test-final-evaluation';
+            evalDiv.innerHTML = evaluationText;
+
+            const btn = document.querySelector('.show-result-btn');
+            if(btn) btn.style.display = 'none';
+
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'show-result-btn';
+            closeBtn.style.marginTop = '20px';
+            closeBtn.style.background = '#22c55e';
+            closeBtn.innerText = 'موافق 🔄';
+            closeBtn.onclick = () => {
+                location.reload();
+            };
+            const resultBox = document.querySelector('.test-result-box');
+            if(resultBox) resultBox.appendChild(closeBtn);
+        }
+
+        function openExitConfirmModal() {
+            stopCurrentAudio();
+            document.getElementById('exitConfirmModal').style.display = 'flex';
+        }
+
+        function confirmCancelTest() {
+            location.reload();
+        }
+
+        function confirmContinueTest() {
+            document.getElementById('exitConfirmModal').style.display = 'none';
+            const currentItem = testQuestionsQueue[testCurrentQuestionIndex];
+            if (currentItem && currentActiveTest === 'test1') {
+                playAudio(currentItem.audio);
+            }
+        }
+
+        /* --- منظومة حماية البرمجية وتاريخ الانتهاء المعتمد (31 ديسمبر 2026) --- */
+        const targetExpiryTimestamp = new Date(2026, 11, 31, 23, 59, 59).getTime();
+
+        function checkExpiryStatus() {
+            const nowTime = new Date().getTime();
+            if (nowTime >= targetExpiryTimestamp) {
+                document.getElementById('expiryOverlay').style.display = 'flex';
+                document.body.style.pointerEvents = 'none';
+                document.getElementById('expiryOverlay').style.pointerEvents = 'auto';
+            }
+        }
+
+        function closeApp() {
+            window.close();
+            document.body.innerHTML = "<h1 style='color:white; text-align:center; margin-top:25vh; font-family:sans-serif;'>تم إغلاق البرنامج بنجاح.</h1>";
+        }
+
+        setInterval(checkExpiryStatus, 2000);
+        checkExpiryStatus();
+    </script>
+</body>
+</html>
